@@ -1,0 +1,294 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'gohilbhavesh554@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isBoundedString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isValidEmail(val) {
+      return val is string && val.size() >= 5 && val.size() <= 160 && val.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+    }
+
+    // Validation Blueprint: WeddingConfig
+    function isValidWeddingConfig(data) {
+      return data.keys().hasAll([
+        'brideFirstName', 'brideLastName', 'groomFirstName', 'groomLastName',
+        'displayNames', 'weddingTagline', 'storyTitle', 'brideParents', 'groomParents',
+        'weddingDate', 'ceremonyTime', 'displayDate', 'timezone',
+        'city', 'state', 'country', 'venueName', 'venueAddress',
+        'dressCode', 'dressCodeDescription', 'dressCodeAvoidNote',
+        'rsvpDeadline', 'rsvpContact', 'nearestAirport', 'airportCode',
+        'hotelInformation', 'transportation', 'parkingInformation',
+        'plusOnePolicy', 'childrenPolicy', 'accessibilityInformation', 'giftInformation',
+        'schedule', 'storyChapters', 'galleryItems', 'faqs', 'hotels', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'brideFirstName', 'brideLastName', 'groomFirstName', 'groomLastName',
+        'displayNames', 'weddingTagline', 'storyTitle', 'brideParents', 'groomParents',
+        'weddingDate', 'ceremonyTime', 'displayDate', 'timezone',
+        'city', 'state', 'country', 'venueName', 'venueAddress',
+        'dressCode', 'dressCodeDescription', 'dressCodeAvoidNote',
+        'rsvpDeadline', 'rsvpContact', 'nearestAirport', 'airportCode',
+        'hotelInformation', 'transportation', 'parkingInformation',
+        'plusOnePolicy', 'childrenPolicy', 'accessibilityInformation', 'giftInformation',
+        'schedule', 'storyChapters', 'galleryItems', 'faqs', 'hotels', 'updatedAt'
+      ]) &&
+      isBoundedString(data.brideFirstName, 1, 60) &&
+      isBoundedString(data.brideLastName, 1, 60) &&
+      isBoundedString(data.groomFirstName, 1, 60) &&
+      isBoundedString(data.groomLastName, 1, 60) &&
+      isBoundedString(data.displayNames, 1, 120) &&
+      isBoundedString(data.weddingTagline, 1, 180) &&
+      isBoundedString(data.storyTitle, 1, 180) &&
+      isBoundedString(data.brideParents, 0, 120) &&
+      isBoundedString(data.groomParents, 0, 120) &&
+      isBoundedString(data.weddingDate, 10, 10) &&
+      data.weddingDate.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+      isBoundedString(data.ceremonyTime, 0, 20) &&
+      isBoundedString(data.displayDate, 1, 80) &&
+      isBoundedString(data.timezone, 1, 64) &&
+      isBoundedString(data.city, 1, 80) &&
+      isBoundedString(data.state, 1, 80) &&
+      isBoundedString(data.country, 1, 80) &&
+      isBoundedString(data.venueName, 1, 120) &&
+      isBoundedString(data.venueAddress, 1, 260) &&
+      isBoundedString(data.dressCode, 1, 80) &&
+      isBoundedString(data.dressCodeDescription, 0, 400) &&
+      isBoundedString(data.dressCodeAvoidNote, 0, 260) &&
+      isBoundedString(data.rsvpDeadline, 0, 20) &&
+      isBoundedString(data.rsvpContact, 0, 160) &&
+      isBoundedString(data.nearestAirport, 0, 140) &&
+      isBoundedString(data.airportCode, 0, 10) &&
+      isBoundedString(data.hotelInformation, 0, 1000) &&
+      isBoundedString(data.transportation, 0, 1000) &&
+      isBoundedString(data.parkingInformation, 0, 600) &&
+      isBoundedString(data.plusOnePolicy, 0, 300) &&
+      isBoundedString(data.childrenPolicy, 0, 300) &&
+      isBoundedString(data.accessibilityInformation, 0, 600) &&
+      isBoundedString(data.giftInformation, 0, 600) &&
+      data.schedule is list && data.schedule.size() <= 10 &&
+      (data.schedule.size() == 0 || data.schedule[0] is map) &&
+      data.storyChapters is list && data.storyChapters.size() <= 10 &&
+      (data.storyChapters.size() == 0 || data.storyChapters[0] is map) &&
+      data.galleryItems is list && data.galleryItems.size() <= 24 &&
+      (data.galleryItems.size() == 0 || data.galleryItems[0] is map) &&
+      data.faqs is list && data.faqs.size() <= 20 &&
+      (data.faqs.size() == 0 || data.faqs[0] is map) &&
+      data.hotels is list && data.hotels.size() <= 8 &&
+      (data.hotels.size() == 0 || data.hotels[0] is map) &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: Invitation
+    function isValidInvitation(data, inviteCode) {
+      return data.keys().hasAll([
+        'code', 'guestName', 'partyLabel', 'maxGuests',
+        'plusOneAllowed', 'childrenAllowed', 'personalNote',
+        'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'code', 'guestName', 'partyLabel', 'maxGuests',
+        'plusOneAllowed', 'childrenAllowed', 'personalNote',
+        'status', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.code) &&
+      data.code == inviteCode &&
+      data.code.size() >= 3 && data.code.size() <= 64 &&
+      isBoundedString(data.guestName, 1, 120) &&
+      isBoundedString(data.partyLabel, 0, 140) &&
+      data.maxGuests is int && data.maxGuests >= 1 && data.maxGuests <= 10 &&
+      data.plusOneAllowed is bool &&
+      data.childrenAllowed is bool &&
+      isBoundedString(data.personalNote, 0, 500) &&
+      data.status in ['pending', 'accepted', 'declined'] &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: Rsvp
+    function isValidRsvp(data) {
+      return data.keys().hasAll([
+        'fullName', 'email', 'attendance', 'guestCount', 'guestNames',
+        'mealPreference', 'dietaryRequirements', 'songRequest', 'message',
+        'inviteCode', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'fullName', 'email', 'attendance', 'guestCount', 'guestNames',
+        'mealPreference', 'dietaryRequirements', 'songRequest', 'message',
+        'inviteCode', 'createdAt', 'updatedAt'
+      ]) &&
+      isBoundedString(data.fullName, 2, 120) &&
+      isValidEmail(data.email) &&
+      data.attendance in ['Joyfully Accepts', 'Regretfully Declines'] &&
+      data.guestCount is int &&
+      ((data.attendance == 'Joyfully Accepts' && data.guestCount >= 1 && data.guestCount <= 10) ||
+       (data.attendance == 'Regretfully Declines' && data.guestCount >= 0 && data.guestCount <= 10)) &&
+      isBoundedString(data.guestNames, 0, 300) &&
+      data.mealPreference in ['', 'Standard', 'Vegetarian', 'Vegan', 'Other'] &&
+      isBoundedString(data.dietaryRequirements, 0, 500) &&
+      isBoundedString(data.songRequest, 0, 180) &&
+      isBoundedString(data.message, 0, 800) &&
+      isBoundedString(data.inviteCode, 0, 64) &&
+      (data.inviteCode == '' || data.inviteCode.matches('^[a-zA-Z0-9_\\-]+$')) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: GuestbookEntry
+    function isValidGuestbookEntry(data) {
+      return data.keys().hasAll([
+        'authorName', 'relationship', 'message', 'inviteCode', 'approved', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'authorName', 'relationship', 'message', 'inviteCode', 'approved', 'createdAt'
+      ]) &&
+      isBoundedString(data.authorName, 2, 100) &&
+      isBoundedString(data.relationship, 0, 80) &&
+      isBoundedString(data.message, 4, 600) &&
+      isBoundedString(data.inviteCode, 0, 64) &&
+      (data.inviteCode == '' || data.inviteCode.matches('^[a-zA-Z0-9_\\-]+$')) &&
+      data.approved is bool &&
+      data.createdAt is timestamp;
+    }
+
+    // 1. Wedding Configuration (Public get for 'main', Admin-only writes)
+    match /weddingConfig/{configId} {
+      allow get: if isValidId(configId) && configId == 'main';
+      allow list: if false;
+      allow create: if isSignedIn() && isValidId(configId) && configId == 'main' &&
+        isValidWeddingConfig(incoming()) &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+      allow update: if isSignedIn() && isValidWeddingConfig(incoming()) &&
+        isValidId(configId) && configId == 'main' &&
+        incoming().updatedAt == request.time &&
+        isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'brideFirstName', 'brideLastName', 'groomFirstName', 'groomLastName',
+          'displayNames', 'weddingTagline', 'storyTitle', 'brideParents', 'groomParents',
+          'weddingDate', 'ceremonyTime', 'displayDate', 'timezone',
+          'city', 'state', 'country', 'venueName', 'venueAddress',
+          'dressCode', 'dressCodeDescription', 'dressCodeAvoidNote',
+          'rsvpDeadline', 'rsvpContact', 'nearestAirport', 'airportCode',
+          'hotelInformation', 'transportation', 'parkingInformation',
+          'plusOnePolicy', 'childrenPolicy', 'accessibilityInformation', 'giftInformation',
+          'schedule', 'storyChapters', 'galleryItems', 'faqs', 'hotels', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // 2. Personalized Guest Invitations (Direct lookup by code; list & writes strictly admin-only)
+    match /invitations/{inviteCode} {
+      allow get: if isValidId(inviteCode);
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && isValidId(inviteCode) &&
+        isValidInvitation(incoming(), inviteCode) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+      allow update: if isSignedIn() && isValidInvitation(incoming(), inviteCode) &&
+        isValidId(inviteCode) &&
+        incoming().code == existing().code &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'guestName', 'partyLabel', 'maxGuests', 'plusOneAllowed',
+          'childrenAllowed', 'personalNote', 'status', 'updatedAt'
+        ]);
+      allow delete: if isSignedIn() && isValidId(inviteCode) && isAdmin();
+    }
+
+    // 3. Private RSVPs (Public create-only with invite validation; reads/updates/deletes strictly admin-only)
+    match /rsvps/{rsvpId} {
+      allow get: if isSignedIn() && isValidId(rsvpId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(rsvpId) &&
+        isValidRsvp(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        (
+          incoming().inviteCode == '' ||
+          (
+            exists(/databases/$(database)/documents/invitations/$(incoming().inviteCode)) &&
+            incoming().guestCount <= get(/databases/$(database)/documents/invitations/$(incoming().inviteCode)).data.maxGuests
+          )
+        );
+      allow update: if isSignedIn() && isValidRsvp(incoming()) &&
+        isValidId(rsvpId) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'fullName', 'email', 'attendance', 'guestCount', 'guestNames',
+          'mealPreference', 'dietaryRequirements', 'songRequest', 'message',
+          'inviteCode', 'updatedAt'
+        ]);
+      allow delete: if isSignedIn() && isValidId(rsvpId) && isAdmin();
+    }
+
+    // 4. Moderated Wedding Guestbook
+    match /guestbook/{entryId} {
+      allow get: if isValidId(entryId) && (existing().approved == true || isAdmin());
+      allow list: if resource.data.approved == true || isAdmin();
+      allow create: if isValidId(entryId) &&
+        isValidGuestbookEntry(incoming()) &&
+        incoming().createdAt == request.time &&
+        (incoming().approved == false || isAdmin()) &&
+        (
+          incoming().inviteCode == '' ||
+          exists(/databases/$(database)/documents/invitations/$(incoming().inviteCode))
+        );
+      allow update: if isSignedIn() && isValidGuestbookEntry(incoming()) &&
+        isValidId(entryId) &&
+        incoming().authorName == existing().authorName &&
+        incoming().relationship == existing().relationship &&
+        incoming().message == existing().message &&
+        incoming().inviteCode == existing().inviteCode &&
+        incoming().createdAt == existing().createdAt &&
+        isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['approved']);
+      allow delete: if isSignedIn() && isValidId(entryId) && isAdmin();
+    }
+
+    // 5. Admin Allowlist (Read own entry only; writes strictly disabled)
+    match /admins/{uid} {
+      allow get: if isSignedIn() && isValidId(uid) && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+  }
+}

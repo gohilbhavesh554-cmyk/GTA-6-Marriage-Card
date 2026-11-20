@@ -1,0 +1,177 @@
+{
+  "entities": {
+    "WeddingConfig": {
+      "title": "WeddingConfig",
+      "description": "Editable wedding configuration including couple details, venue, schedule, travel, dress code, story chapters, gallery, and FAQ.",
+      "type": "object",
+      "properties": {
+        "brideFirstName": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "brideLastName": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "groomFirstName": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "groomLastName": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "displayNames": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "weddingTagline": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "storyTitle": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "brideParents": { "type": "string", "maxLength": 120 },
+        "groomParents": { "type": "string", "maxLength": 120 },
+        "weddingDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "maxLength": 10 },
+        "ceremonyTime": { "type": "string", "maxLength": 20 },
+        "displayDate": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "timezone": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "city": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "state": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "country": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "venueName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "venueAddress": { "type": "string", "minLength": 1, "maxLength": 260 },
+        "dressCode": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "dressCodeDescription": { "type": "string", "maxLength": 400 },
+        "dressCodeAvoidNote": { "type": "string", "maxLength": 260 },
+        "rsvpDeadline": { "type": "string", "maxLength": 20 },
+        "rsvpContact": { "type": "string", "maxLength": 160 },
+        "nearestAirport": { "type": "string", "maxLength": 140 },
+        "airportCode": { "type": "string", "maxLength": 10 },
+        "hotelInformation": { "type": "string", "maxLength": 1000 },
+        "transportation": { "type": "string", "maxLength": 1000 },
+        "parkingInformation": { "type": "string", "maxLength": 600 },
+        "plusOnePolicy": { "type": "string", "maxLength": 300 },
+        "childrenPolicy": { "type": "string", "maxLength": 300 },
+        "accessibilityInformation": { "type": "string", "maxLength": 600 },
+        "giftInformation": { "type": "string", "maxLength": 600 },
+        "schedule": { "type": "array", "description": "Up to 10 scheduled wedding events" },
+        "storyChapters": { "type": "array", "description": "Up to 10 story chapters" },
+        "galleryItems": { "type": "array", "description": "Up to 24 gallery items" },
+        "faqs": { "type": "array", "description": "Up to 20 FAQ entries" },
+        "hotels": { "type": "array", "description": "Up to 8 recommended hotels" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "brideFirstName",
+        "groomFirstName",
+        "displayNames",
+        "weddingDate",
+        "displayDate",
+        "timezone",
+        "city",
+        "state",
+        "venueName",
+        "venueAddress",
+        "dressCode",
+        "updatedAt"
+      ]
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "Personalized guest invitation link with allowed guest count and private note (no PII).",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "minLength": 3, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "guestName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "partyLabel": { "type": "string", "maxLength": 140 },
+        "maxGuests": { "type": "integer" },
+        "plusOneAllowed": { "type": "boolean" },
+        "childrenAllowed": { "type": "boolean" },
+        "personalNote": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "code",
+        "guestName",
+        "maxGuests",
+        "plusOneAllowed",
+        "childrenAllowed",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Rsvp": {
+      "title": "Rsvp",
+      "description": "Private wedding guest RSVP record containing contact email, party size, meals, allergies, song request, and message.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "email": { "type": "string", "format": "email", "minLength": 5, "maxLength": 160 },
+        "attendance": { "type": "string", "enum": ["Joyfully Accepts", "Regretfully Declines"] },
+        "guestCount": { "type": "integer" },
+        "guestNames": { "type": "string", "maxLength": 300 },
+        "mealPreference": { "type": "string", "enum": ["", "Standard", "Vegetarian", "Vegan", "Other"] },
+        "dietaryRequirements": { "type": "string", "maxLength": 500 },
+        "songRequest": { "type": "string", "maxLength": 180 },
+        "message": { "type": "string", "maxLength": 800 },
+        "inviteCode": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "fullName",
+        "email",
+        "attendance",
+        "guestCount",
+        "guestNames",
+        "mealPreference",
+        "dietaryRequirements",
+        "songRequest",
+        "message",
+        "inviteCode",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "GuestbookEntry": {
+      "title": "GuestbookEntry",
+      "description": "Congratulatory guestbook note subject to couple moderation before public display.",
+      "type": "object",
+      "properties": {
+        "authorName": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "relationship": { "type": "string", "maxLength": 80 },
+        "message": { "type": "string", "minLength": 4, "maxLength": 600 },
+        "inviteCode": { "type": "string", "maxLength": 64 },
+        "approved": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "authorName",
+        "relationship",
+        "message",
+        "inviteCode",
+        "approved",
+        "createdAt"
+      ]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized couple admin record keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "maxLength": 160 },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/weddingConfig/{configId}": {
+      "schema": { "$ref": "#/entities/WeddingConfig" },
+      "description": "Publicly readable, admin-editable wedding invitation content document (main)."
+    },
+    "/invitations/{inviteCode}": {
+      "schema": { "$ref": "#/entities/Invitation" },
+      "description": "Guest-specific invitation records. Direct lookup by unguessable code is allowed; listing and writes are admin-only."
+    },
+    "/rsvps/{rsvpId}": {
+      "schema": { "$ref": "#/entities/Rsvp" },
+      "description": "Private guest RSVP submissions. Public create-only with strict validation and duplicate prevention; reads, updates, and deletes are strictly admin-only."
+    },
+    "/guestbook/{entryId}": {
+      "schema": { "$ref": "#/entities/GuestbookEntry" },
+      "description": "Guestbook messages. Public guests may submit with approved=false; public reads only return approved entries; admins moderate and delete."
+    },
+    "/admins/{uid}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Immutable admin allowlist readable only by the matching authenticated user."
+    }
+  }
+}

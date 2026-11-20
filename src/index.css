@@ -1,0 +1,223 @@
+@import "tailwindcss";
+
+@theme {
+  --color-midnight: #0A090F;
+  --color-midnight-elevated: #13111B;
+  --color-cream: #FAF3EA;
+  --font-display: "Bebas Neue", "Oswald", sans-serif;
+  --font-editorial: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Refined 35mm Cinematographic GTA VI Luxury Themes */
+:root,
+[data-theme="vice"] {
+  --bg-canvas: #0A090F;
+  --bg-surface: #13111B;
+  --bg-surface-alt: #0E0C15;
+  --accent-1: #F26386;
+  --accent-2: #F48C5E;
+  --accent-3: #F2C97D;
+  --accent-cool: #7AC8DB;
+  --headline-grad: linear-gradient(180deg, #FDF8F2 0%, #F5D596 48%, #F4966A 78%, #F26386 100%);
+  --cta-grad: linear-gradient(95deg, #F26386 0%, #F48C5E 52%, #F2C97D 100%);
+  --ambient-top: rgba(242, 99, 134, 0.11);
+  --ambient-right: rgba(244, 140, 94, 0.08);
+  --ambient-left: rgba(122, 200, 219, 0.06);
+}
+
+[data-theme="golden"] {
+  --bg-canvas: #100D0B;
+  --bg-surface: #181310;
+  --bg-surface-alt: #14100D;
+  --accent-1: #EBC06D;
+  --accent-2: #E87F58;
+  --accent-3: #F7DFAA;
+  --accent-cool: #6BC5B8;
+  --headline-grad: linear-gradient(180deg, #FFFBF5 0%, #F7DFAA 46%, #EBC06D 76%, #E87F58 100%);
+  --cta-grad: linear-gradient(95deg, #CFA150 0%, #EBC06D 54%, #F7DFAA 100%);
+  --ambient-top: rgba(235, 192, 109, 0.11);
+  --ambient-right: rgba(232, 127, 88, 0.08);
+  --ambient-left: rgba(107, 197, 184, 0.05);
+}
+
+[data-theme="midnight"] {
+  --bg-canvas: #070A12;
+  --bg-surface: #101524;
+  --bg-surface-alt: #0B0F1B;
+  --accent-1: #6DD5ED;
+  --accent-2: #B584FF;
+  --accent-3: #F072A5;
+  --accent-cool: #6DD5ED;
+  --headline-grad: linear-gradient(180deg, #F7FAFF 0%, #9FE3F7 44%, #C29BFF 76%, #F072A5 100%);
+  --cta-grad: linear-gradient(95deg, #6DD5ED 0%, #9E88F5 54%, #F072A5 100%);
+  --ambient-top: rgba(109, 213, 237, 0.1);
+  --ambient-right: rgba(181, 132, 255, 0.09);
+  --ambient-left: rgba(240, 114, 165, 0.06);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    background-color: var(--bg-canvas);
+    color: #FAF3EA;
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Completely hide scrollbars on phones & previews */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-3);
+    outline-offset: 2px;
+  }
+}
+
+.font-editorial {
+  font-family: var(--font-editorial);
+}
+
+/* Subtle 35mm cinema grain */
+.film-grain {
+  background-image: radial-gradient(rgba(250, 243, 234, 0.04) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* Hairline sunset divider */
+.sunset-hairline {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-1) 30%,
+    var(--accent-2) 55%,
+    var(--accent-3) 80%,
+    transparent 100%
+  );
+  opacity: 0.72;
+}
+
+/* Crisp GTA VI poster display gradient */
+.vice-sunset-text {
+  background: var(--headline-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Primary CTA gradient */
+.vice-cta-bg {
+  background: var(--cta-grad);
+}
+
+/* Restrained editorial horizon ambient wash */
+.vice-ambient-glow {
+  background:
+    radial-gradient(ellipse 70% 42% at 50% 0%, var(--ambient-top), transparent 68%),
+    radial-gradient(ellipse 48% 36% at 88% 22%, var(--ambient-right), transparent 64%),
+    radial-gradient(ellipse 46% 34% at 12% 78%, var(--ambient-left), transparent 66%);
+}
+
+@keyframes ken-burns-slow {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.04) translate3d(0, -0.6%, 0);
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.animate-ken-burns {
+  animation: ken-burns-slow 24s ease-in-out infinite;
+}
+
+@keyframes light-sweep {
+  0% {
+    transform: translateX(-140%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+
+.animate-light-sweep {
+  animation: light-sweep 5.8s ease-in-out infinite;
+}
+
+@keyframes eq-pulse {
+  0%, 100% {
+    transform: scaleY(0.28);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-eq-1 {
+  animation: eq-pulse 0.76s ease-in-out infinite;
+}
+.animate-eq-2 {
+  animation: eq-pulse 0.58s ease-in-out 0.14s infinite;
+}
+.animate-eq-3 {
+  animation: eq-pulse 0.86s ease-in-out 0.24s infinite;
+}
+.animate-eq-4 {
+  animation: eq-pulse 0.66s ease-in-out 0.08s infinite;
+}
+
+/* 3D perspective helpers */
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-light-sweep,
+  .animate-ken-burns,
+  .animate-eq-1,
+  .animate-eq-2,
+  .animate-eq-3,
+  .animate-eq-4 {
+    animation: none;
+  }
+}

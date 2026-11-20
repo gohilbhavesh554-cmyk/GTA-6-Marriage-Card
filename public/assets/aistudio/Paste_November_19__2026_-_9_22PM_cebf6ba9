@@ -1,0 +1,773 @@
+
+{
+  "project": {
+    "name": "LOVE IN THE CITY",
+    "type": "Premium Interactive Wedding Invitation WebApp",
+    "creative_direction": "GTA VI and Vice City inspired romantic wedding experience",
+    "main_goal": "Build a fully responsive, cinematic, highly interactive American wedding invitation website that feels like a real premium digital experience rather than a generic template or AI-generated landing page.",
+    "target_audience": [
+      "United States",
+      "United Kingdom",
+      "Canada",
+      "Australia",
+      "Europe",
+      "Global couples"
+    ],
+    "experience": "A romantic Miami-inspired open-world wedding invitation where guests explore the couple's story, discover wedding events, view travel information and RSVP.",
+    "quality_level": "Premium international digital agency quality",
+    "important": "Do not create a basic wedding template. Build an original, memorable, cinematic experience with excellent typography, photography, interactions and responsive behavior."
+  },
+  "creative_concept": {
+    "theme": "A romantic Vice City night meets a luxury Miami wedding",
+    "visual_inspiration": [
+      "GTA VI-inspired Miami and Vice City atmosphere",
+      "Neon Miami streets",
+      "Oceanfront highways",
+      "Palm trees at sunset",
+      "Vintage convertible cars",
+      "Luxury beach hotels",
+      "Pink and orange sunset skies",
+      "Cinematic American nightlife",
+      "Retro travel postcards",
+      "Open-world map interfaces",
+      "Vintage film photography"
+    ],
+    "emotional_feeling": [
+      "Romantic",
+      "Exciting",
+      "Premium",
+      "Playful",
+      "Cinematic",
+      "Personal",
+      "Memorable"
+    ],
+    "originality_rules": [
+      "Create an original wedding identity inspired by the atmosphere of GTA VI.",
+      "Do not copy the official GTA VI logo or Rockstar Games branding.",
+      "Do not use copyrighted game screenshots, characters, artwork or music.",
+      "Use original interface designs, original illustrations and properly licensed photography.",
+      "The result should feel inspired by a real Miami lifestyle campaign."
+    ]
+  },
+  "sample_wedding_data": {
+    "content_status": "DEMO DATA - ALL DETAILS MUST BE EDITABLE",
+    "couple": {
+      "bride_first_name": "Ava",
+      "bride_last_name": "Bennett",
+      "groom_first_name": "Noah",
+      "groom_last_name": "Carter",
+      "display_names": "Ava & Noah",
+      "wedding_tagline": "One City. Two Hearts. One Forever.",
+      "story_title": "Our Biggest Adventure Starts Here.",
+      "bride_parents": "Mr. & Mrs. Bennett",
+      "groom_parents": "Mr. & Mrs. Carter"
+    },
+    "wedding": {
+      "date": "2027-06-19",
+      "display_date": "Saturday, June 19, 2027",
+      "timezone": "America/New_York",
+      "city": "Miami",
+      "state": "Florida",
+      "country": "USA",
+      "venue_name": "The Palms Estate",
+      "venue_address": "Replace with the couple's actual wedding venue address, Miami, FL, USA",
+      "dress_code": "Tropical Formal",
+      "dress_code_description": "Elegant summer outfits, sunset colors and sophisticated evening wear.",
+      "rsvp_deadline": "2027-05-15",
+      "rsvp_contact": "Replace with the couple's wedding contact email",
+      "event_language": "English"
+    },
+    "schedule": [
+      {
+        "id": "event-01",
+        "title": "The Beginning",
+        "subtitle": "Wedding Ceremony",
+        "time": "4:30 PM",
+        "description": "Join us as we begin our forever together.",
+        "location": "The Palms Estate"
+      },
+      {
+        "id": "event-02",
+        "title": "Golden Hour",
+        "subtitle": "Cocktail Hour",
+        "time": "5:30 PM",
+        "description": "Drinks, beautiful views and unforgettable conversations.",
+        "location": "Oceanfront Terrace"
+      },
+      {
+        "id": "event-03",
+        "title": "The Celebration",
+        "subtitle": "Dinner & Reception",
+        "time": "7:00 PM",
+        "description": "Celebrate with music, dinner, dancing and love.",
+        "location": "The Grand Ballroom"
+      },
+      {
+        "id": "event-04",
+        "title": "After Dark",
+        "subtitle": "Wedding After Party",
+        "time": "10:00 PM",
+        "description": "One more night to remember.",
+        "location": "The Palm Lounge"
+      }
+    ],
+    "travel": {
+      "nearest_airport": "Miami International Airport",
+      "airport_code": "MIA",
+      "hotel_information": "Add recommended hotels and booking links",
+      "transportation": "Add shuttle, parking and transportation information",
+      "map_location": "Replace with actual venue location"
+    },
+    "guest_information": {
+      "plus_one_policy": "As specified on your invitation",
+      "children_policy": "Please follow your personal invitation details",
+      "dietary_requirements": true,
+      "accessibility_information": "Add venue accessibility information",
+      "gift_information": "Your presence is our greatest gift. Optional registry details can be added here."
+    }
+  },
+  "design_system": {
+    "style": "Premium cinematic editorial design",
+    "color_palette": {
+      "deep_midnight": "#11131C",
+      "night_purple": "#25203F",
+      "vice_pink": "#FF668C",
+      "sunset_orange": "#FF9162",
+      "warm_gold": "#F7C779",
+      "ocean_blue": "#67A9C7",
+      "cream": "#FFF4E8",
+      "pure_white": "#FFFFFF"
+    },
+    "typography": {
+      "display_font": "Bebas Neue or a similar condensed cinematic display typeface",
+      "heading_font": "DM Sans",
+      "body_font": "Inter",
+      "romantic_accent_font": "A tasteful editorial serif such as Cormorant Garamond",
+      "rules": [
+        "Use large editorial typography for the couple's names.",
+        "Use carefully balanced letter spacing.",
+        "Avoid too many font styles.",
+        "Keep body text highly readable.",
+        "Use elegant serif typography only for romantic details and selected headings."
+      ]
+    },
+    "visual_elements": [
+      "Soft cinematic film grain",
+      "Subtle sunset glow",
+      "Neon sign typography",
+      "Palm tree silhouettes",
+      "Film-frame borders",
+      "Vintage postcard details",
+      "Minimal map coordinates",
+      "Mission-style information labels",
+      "Small HUD-inspired interface details",
+      "Elegant custom line icons"
+    ],
+    "avoid": [
+      "Generic wedding template aesthetics",
+      "Excessive purple and pink gradients",
+      "Cheap glowing effects",
+      "Random 3D decorations",
+      "Generic AI-created faces",
+      "Unnecessary glassmorphism",
+      "Excessive animation",
+      "Crowded layouts",
+      "Cartoonish game UI",
+      "Low-quality stock imagery"
+    ]
+  },
+  "website_structure": {
+    "type": "Interactive single-page storytelling experience",
+    "navigation": [
+      "Home",
+      "Our Story",
+      "The Wedding",
+      "Location",
+      "Gallery",
+      "RSVP"
+    ],
+    "sections": [
+      {
+        "id": "intro",
+        "name": "Cinematic Opening",
+        "priority": "Very High",
+        "design": "A dramatic full-screen opening inspired by a cinematic open-world game introduction.",
+        "visual": "A realistic Miami oceanfront highway at golden hour, palm trees, distant city skyline, ocean reflections and an elegant vintage convertible.",
+        "animation": [
+          "Begin with a dark screen.",
+          "Show a subtle cinematic loading indicator.",
+          "Fade into the Miami sunset scene.",
+          "Slowly reveal the couple's wedding title.",
+          "Animate LOVE IN THE CITY with elegant cinematic typography.",
+          "Reveal the Enter Invitation button."
+        ],
+        "content": {
+          "eyebrow": "AN INVITATION TO OUR BIGGEST ADVENTURE",
+          "title": "LOVE IN THE CITY",
+          "couple_names": "AVA & NOAH",
+          "subtitle": "One City. Two Hearts. One Forever.",
+          "date": "JUNE 19, 2027",
+          "location": "MIAMI, FLORIDA"
+        },
+        "interaction": [
+          "Enter Invitation button opens the main wedding experience.",
+          "Provide a visible skip intro option.",
+          "Allow the opening to play only once per browser session.",
+          "Make all opening animations skippable."
+        ]
+      },
+      {
+        "id": "hero",
+        "name": "Wedding Hero",
+        "design": "Full-screen editorial wedding cover using a genuine couple photograph.",
+        "visual": "A romantic photograph of the couple standing near a luxury Miami beach location during sunset.",
+        "layout": "Full-width background photography with dark cinematic overlay and large centered typography.",
+        "content": {
+          "label": "THE WEDDING OF",
+          "names": "AVA & NOAH",
+          "description": "Together is our favorite place to be.",
+          "date": "Saturday, June 19, 2027",
+          "location": "Miami, Florida, USA",
+          "button": "EXPLORE OUR INVITATION"
+        },
+        "animation": [
+          "Slow image reveal",
+          "Subtle parallax",
+          "Elegant text fade",
+          "Animated date details",
+          "Smooth scroll transition"
+        ]
+      },
+      {
+        "id": "countdown",
+        "name": "Wedding Countdown",
+        "design": "A premium digital countdown styled like a minimal mission timer.",
+        "content": {
+          "title": "THE BIG DAY IS GETTING CLOSER",
+          "subtitle": "Our forever starts in...",
+          "timer": [
+            "Days",
+            "Hours",
+            "Minutes",
+            "Seconds"
+          ]
+        },
+        "functionality": [
+          "Calculate time until the wedding using the actual wedding date.",
+          "Use the America/New_York timezone.",
+          "Update every second.",
+          "Handle the completed countdown state.",
+          "Avoid hardcoded countdown numbers."
+        ]
+      },
+      {
+        "id": "story",
+        "name": "Our Love Story",
+        "design": "A cinematic photo-story inspired by an open-world journey timeline.",
+        "title": "EVERY GREAT ADVENTURE HAS A BEGINNING",
+        "chapters": [
+          {
+            "year": "2019",
+            "title": "The First Hello",
+            "description": "The moment two separate worlds became one story.",
+            "photo": "Add couple's first photograph"
+          },
+          {
+            "year": "2021",
+            "title": "The Adventures",
+            "description": "From little moments to unforgettable memories.",
+            "photo": "Add travel or memorable couple photograph"
+          },
+          {
+            "year": "2025",
+            "title": "The Promise",
+            "description": "A beautiful promise for the rest of our lives.",
+            "photo": "Add engagement photograph"
+          },
+          {
+            "year": "2027",
+            "title": "Forever Begins",
+            "description": "Our biggest and most beautiful adventure starts now.",
+            "photo": "Add wedding photograph"
+          }
+        ],
+        "animation": [
+          "Scroll-triggered timeline reveal",
+          "Smooth image transitions",
+          "Soft photographic movement",
+          "Animated chapter labels"
+        ]
+      },
+      {
+        "id": "wedding-events",
+        "name": "Wedding Events",
+        "design": "A game-inspired mission briefing redesigned as an elegant wedding schedule.",
+        "title": "YOUR MISSION: CELEBRATE LOVE",
+        "events": "Use all events from sample_wedding_data.schedule.",
+        "visual": "Create individual event cards featuring time, event title, location and minimal custom icons.",
+        "interaction": [
+          "Hover reveals additional event information.",
+          "Tap opens event details on mobile.",
+          "Add to calendar button for each event.",
+          "Download all event details as an ICS calendar file."
+        ]
+      },
+      {
+        "id": "location",
+        "name": "Wedding Location",
+        "design": "An interactive open-world-inspired Miami map interface.",
+        "title": "MEET US IN THE CITY",
+        "visual": "Dark premium street-map treatment with a highlighted wedding venue marker and decorative map coordinates.",
+        "information": [
+          "Venue name",
+          "Full wedding address",
+          "City and state",
+          "Parking information",
+          "Nearest airport",
+          "Hotel recommendations"
+        ],
+        "features": [
+          "Show a real interactive map when a valid address is configured.",
+          "Open directions in Google Maps.",
+          "Copy venue address.",
+          "Display travel and parking information.",
+          "Never invent venue coordinates or hotel information."
+        ]
+      },
+      {
+        "id": "dress-code",
+        "name": "Dress Code",
+        "design": "Luxury fashion editorial with realistic outfit photography.",
+        "title": "DRESS TO IMPRESS",
+        "subtitle": "Tropical Formal",
+        "description": "Think elegant summer outfits, beautiful sunset tones and sophisticated evening style.",
+        "features": [
+          "Show suggested color palette.",
+          "Display outfit inspiration for women and men.",
+          "Use real licensed fashion photography.",
+          "Include a discreet note about colors the couple would prefer guests to avoid."
+        ]
+      },
+      {
+        "id": "gallery",
+        "name": "Couple Gallery",
+        "design": "A premium magazine-style photographic gallery.",
+        "title": "MOMENTS THAT MADE US",
+        "visual": "Large editorial photo compositions mixed with smaller photographic frames.",
+        "features": [
+          "Responsive photography grid",
+          "Beautiful image lightbox",
+          "Swipe navigation on mobile",
+          "Smooth image reveal animations",
+          "Image captions",
+          "Use uploaded couple images instead of fabricated people"
+        ]
+      },
+      {
+        "id": "travel",
+        "name": "Travel & Stay",
+        "design": "A beautiful Miami travel-guide section.",
+        "title": "YOUR MIAMI WEEKEND",
+        "content": [
+          "Nearest airport information",
+          "Recommended hotels",
+          "Parking details",
+          "Local transportation",
+          "Wedding shuttle information",
+          "Useful travel notes"
+        ],
+        "features": [
+          "Clickable hotel booking links once supplied",
+          "Google Maps directions",
+          "Airport directions",
+          "Mobile-friendly travel information"
+        ]
+      },
+      {
+        "id": "faq",
+        "name": "Wedding FAQ",
+        "design": "Minimal editorial accordion interface.",
+        "questions": [
+          {
+            "question": "What time should we arrive?",
+            "answer": "Please arrive at least 30 minutes before the ceremony."
+          },
+          {
+            "question": "Can I bring a plus one?",
+            "answer": "Please follow the plus-one details on your personal invitation."
+          },
+          {
+            "question": "Is there parking available?",
+            "answer": "Add the confirmed venue parking details here."
+          },
+          {
+            "question": "What should I wear?",
+            "answer": "The dress code is Tropical Formal."
+          },
+          {
+            "question": "Can I share photos?",
+            "answer": "We would love you to share your special moments with us."
+          },
+          {
+            "question": "Who can I contact?",
+            "answer": "Use the wedding contact details provided on your invitation."
+          }
+        ]
+      },
+      {
+        "id": "rsvp",
+        "name": "RSVP Experience",
+        "design": "The most memorable interactive section. Create an invitation-card interface with a premium mission-confirmation feeling.",
+        "title": "WILL YOU JOIN OUR ADVENTURE?",
+        "subtitle": "We cannot imagine celebrating without you.",
+        "fields": [
+          {
+            "name": "full_name",
+            "label": "Your Full Name",
+            "type": "text",
+            "required": true
+          },
+          {
+            "name": "email",
+            "label": "Email Address",
+            "type": "email",
+            "required": true
+          },
+          {
+            "name": "attendance",
+            "label": "Will You Be Joining Us?",
+            "type": "radio",
+            "options": [
+              "Joyfully Accepts",
+              "Regretfully Declines"
+            ],
+            "required": true
+          },
+          {
+            "name": "guest_count",
+            "label": "Number of Guests",
+            "type": "number",
+            "required": true,
+            "min": 1,
+            "max": 5
+          },
+          {
+            "name": "guest_names",
+            "label": "Additional Guest Names",
+            "type": "text",
+            "required": false
+          },
+          {
+            "name": "meal_preference",
+            "label": "Meal Preference",
+            "type": "select",
+            "options": [
+              "Standard",
+              "Vegetarian",
+              "Vegan",
+              "Other"
+            ],
+            "required": false
+          },
+          {
+            "name": "dietary_requirements",
+            "label": "Dietary Requirements or Allergies",
+            "type": "textarea",
+            "required": false
+          },
+          {
+            "name": "song_request",
+            "label": "A Song That Will Get You Dancing",
+            "type": "text",
+            "required": false
+          },
+          {
+            "name": "message",
+            "label": "Leave Us a Message",
+            "type": "textarea",
+            "required": false
+          }
+        ],
+        "confirmation": {
+          "accept_title": "MISSION ACCEPTED!",
+          "accept_description": "Your RSVP has been received. We cannot wait to celebrate with you!",
+          "decline_title": "YOU'LL BE MISSED!",
+          "decline_description": "Thank you for letting us know. Sending you lots of love."
+        },
+        "functionality": [
+          "Validate all required fields.",
+          "Show conditional guest fields when appropriate.",
+          "Validate guest count against the invitation's allowed number.",
+          "Prevent duplicate submissions where possible.",
+          "Store RSVPs securely in a real database.",
+          "Give the couple a private RSVP management dashboard.",
+          "Provide a real success or error state based on the actual server response.",
+          "Do not display a successful submission when the backend is not connected.",
+          "Keep guest responses private."
+        ]
+      },
+      {
+        "id": "final",
+        "name": "Final Wedding Message",
+        "design": "A cinematic night-time Miami oceanfront ending with soft lights and romantic typography.",
+        "title": "OUR NEXT CHAPTER STARTS WITH YOU",
+        "subtitle": "Thank you for being part of our story.",
+        "signature": "WITH LOVE, AVA & NOAH",
+        "footer": "SEE YOU IN MIAMI"
+      }
+    ]
+  },
+  "unique_features": {
+    "priority": "Add memorable features that make this invitation more than a normal wedding website.",
+    "features": [
+      {
+        "name": "Interactive Invitation Opening",
+        "description": "A beautiful invitation envelope or cinematic card opening transition before guests enter the main website."
+      },
+      {
+        "name": "Guest-Specific Invitation",
+        "description": "Allow the couple to generate personalized invitation URLs with the guest's name and allowed guest count."
+      },
+      {
+        "name": "Wedding Mission Card",
+        "description": "Generate a downloadable digital invitation card designed like a premium Miami event pass."
+      },
+      {
+        "name": "Wedding Countdown",
+        "description": "Live countdown based on the configured date and timezone."
+      },
+      {
+        "name": "Add to Calendar",
+        "description": "Generate downloadable ICS calendar invitations for supported calendar applications."
+      },
+      {
+        "name": "Share Invitation",
+        "description": "Use native mobile sharing where supported, plus a copy-link fallback."
+      },
+      {
+        "name": "Personalized QR Code",
+        "description": "Create a QR code linking to the wedding invitation or a guest-specific invitation URL."
+      },
+      {
+        "name": "Wedding Guestbook",
+        "description": "Allow invited guests to leave a personal congratulatory message after validation."
+      },
+      {
+        "name": "Digital Wedding Pass",
+        "description": "Allow guests to view a stylish digital entry pass with their invitation name and wedding date."
+      },
+      {
+        "name": "Surprise Photo Reveal",
+        "description": "Create an optional interactive memory reveal where photographs appear with cinematic transitions."
+      }
+    ]
+  },
+  "motion_and_animation": {
+    "style": "High-end cinematic website motion, not excessive gaming animation.",
+    "technology": [
+      "Framer Motion",
+      "CSS animations",
+      "Smooth scrolling",
+      "Intersection Observer"
+    ],
+    "required_animations": [
+      "Cinematic opening scene",
+      "Smooth page transitions",
+      "Parallax hero photography",
+      "Text reveal animation",
+      "Slow moving background elements",
+      "Animated countdown digits",
+      "Timeline reveal",
+      "Photo gallery transitions",
+      "Interactive event cards",
+      "Elegant RSVP form transitions",
+      "Subtle hover effects",
+      "Closing scene fade-out"
+    ],
+    "mouse_interactions": [
+      "Subtle cursor movement effect on desktop",
+      "Gentle card depth effect",
+      "Interactive map hover details",
+      "Custom but usable pointer states"
+    ],
+    "mobile_motion": [
+      "Touch-friendly transitions",
+      "Reduced parallax",
+      "Smooth scroll reveal",
+      "Lightweight animations"
+    ],
+    "performance_rules": [
+      "Respect prefers-reduced-motion.",
+      "Never block access to the invitation with a long intro.",
+      "Keep animations smooth and lightweight.",
+      "Use transform and opacity where possible.",
+      "Avoid unnecessary WebGL or heavy 3D scenes.",
+      "Disable complex motion on low-performance devices when needed.",
+      "Never make important content dependent on animation."
+    ],
+    "audio": {
+      "default": "OFF",
+      "feature": "Optional original romantic background music or properly licensed music.",
+      "controls": "Visible music toggle with play and pause.",
+      "rules": [
+        "Never autoplay music with sound.",
+        "Do not use GTA VI or other copyrighted game music.",
+        "Keep the website fully usable without sound."
+      ]
+    }
+  },
+  "photography_and_assets": {
+    "photography_direction": "Real luxury wedding photography and cinematic editorial travel photography.",
+    "priority_assets": [
+      "Real couple portrait",
+      "Miami oceanfront sunset",
+      "Luxury convertible on palm-lined road",
+      "Miami skyline at night",
+      "Beautiful wedding ceremony setup",
+      "Oceanfront reception",
+      "Elegant summer wedding fashion",
+      "Romantic wedding details"
+    ],
+    "asset_rules": [
+      "Use uploaded photos of the actual couple wherever possible.",
+      "Never invent the couple's identity or pretend generated people are their real photographs.",
+      "Use properly licensed photography for decorative backgrounds.",
+      "Use temporary image placeholders when real photos are unavailable.",
+      "Keep the visual quality realistic and editorial.",
+      "Avoid obvious AI-generated faces, distorted hands, plastic-looking skin and fake environments.",
+      "Maintain consistent color grading across photographs."
+    ]
+  },
+  "technical_requirements": {
+    "frontend": {
+      "framework": "React with TypeScript",
+      "styling": "Tailwind CSS with custom design tokens",
+      "animation": "Framer Motion",
+      "icons": "Lucide icons or original SVG icons",
+      "architecture": "Reusable components and clean project structure"
+    },
+    "backend": {
+      "recommended": "Supabase",
+      "features": [
+        "Secure RSVP database",
+        "Private guest records",
+        "Guest invitation management",
+        "Unique invitation links",
+        "Guest count tracking",
+        "Wedding dashboard authentication",
+        "Guestbook moderation"
+      ],
+      "security": [
+        "Keep secret credentials on the server.",
+        "Never expose database service-role keys in frontend code.",
+        "Validate and sanitize form inputs.",
+        "Use appropriate row-level security.",
+        "Restrict private RSVP data to authorized users.",
+        "Implement reasonable form submission rate limits."
+      ]
+    },
+    "admin_dashboard": {
+      "name": "Wedding Control Center",
+      "access": "Private authenticated access for the couple",
+      "features": [
+        "Total invitations",
+        "Accepted guests",
+        "Declined guests",
+        "Pending RSVPs",
+        "Total confirmed guest count",
+        "Dietary preferences",
+        "Song requests",
+        "Guest messages",
+        "Search and filter guests",
+        "Export RSVP data to CSV",
+        "Create and manage guest-specific invitation links",
+        "Edit wedding information"
+      ],
+      "design": "Minimal premium dashboard matching the wedding visual identity."
+    },
+    "responsive": {
+      "mobile": "360px to 767px",
+      "tablet": "768px to 1023px",
+      "desktop": "1024px and above",
+      "requirements": [
+        "Design mobile-first.",
+        "No horizontal overflow.",
+        "Large readable text.",
+        "Touch-friendly controls.",
+        "Responsive image crops.",
+        "Navigation drawer for mobile.",
+        "Desktop cinematic hero composition.",
+        "Optimized loading on mobile networks.",
+        "Accessible color contrast."
+      ]
+    },
+    "seo_and_sharing": {
+      "page_title": "Ava & Noah | Our Wedding in Miami",
+      "meta_description": "Join Ava and Noah as they celebrate their wedding in beautiful Miami, Florida.",
+      "open_graph": "Create an attractive 1200x630 invitation-sharing image.",
+      "social_preview": "Show couple names, wedding date, city and a premium sunset photograph.",
+      "requirements": [
+        "Semantic HTML",
+        "Metadata",
+        "Open Graph tags",
+        "Social sharing image",
+        "Favicon",
+        "Accessible image descriptions"
+      ]
+    }
+  },
+  "quality_checklist": [
+    "The first screen must immediately feel cinematic and premium.",
+    "The actual couple's names and wedding details must be prominent.",
+    "All sample wedding information must be editable.",
+    "All navigation must work.",
+    "The countdown must use the real configured wedding date.",
+    "RSVP must have real form validation.",
+    "RSVP submission must not falsely report success without persistence.",
+    "Google Maps directions must use the configured real venue address.",
+    "Calendar downloads must work.",
+    "QR code must open the correct invitation URL.",
+    "The design must look excellent on iPhone and Android.",
+    "The design must look equally excellent on desktop.",
+    "All interactive components must work with keyboard and touch.",
+    "Images must load correctly with appropriate fallbacks.",
+    "Animations must not make the page slow.",
+    "The complete website must feel like a premium human-designed creative project."
+  ],
+  "final_delivery": {
+    "deliverable": "A complete working, responsive wedding invitation WebApp.",
+    "must_include": [
+      "Finished frontend",
+      "Reusable components",
+      "Wedding content configuration",
+      "Working navigation",
+      "Cinematic opening",
+      "Wedding countdown",
+      "Our story timeline",
+      "Wedding event schedule",
+      "Location and directions",
+      "Photo gallery",
+      "Dress code section",
+      "Travel information",
+      "FAQ",
+      "RSVP functionality",
+      "Shareable invitation",
+      "Calendar download",
+      "Responsive layouts",
+      "SEO and social sharing",
+      "Private admin dashboard if backend is configured"
+    ],
+    "development_process": [
+      "Plan the complete experience before coding.",
+      "Establish the design system.",
+      "Build the responsive page structure.",
+      "Implement interactions and animations.",
+      "Connect backend functionality where configured.",
+      "Test all forms and navigation.",
+      "Review mobile, tablet and desktop layouts.",
+      "Fix visual inconsistencies and bugs.",
+      "Verify the final running application."
+    ],
+    "final_instruction": "Do not stop after producing a static design or a homepage mockup. Build the actual working website, test the experience, and polish every section. Use realistic photography, excellent typography, thoughtful spacing, original GTA VI-inspired Miami visual elements and a beautiful romantic atmosphere. The finished product should be impressive enough that an American couple would genuinely want to send it to their wedding guests."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "LOVE IN THE CITY — Ava & Noah",
+  "description": "A cinematic Miami sunset interactive wedding invitation for Ava & Noah in Miami, Florida — featuring a live countdown, love story timeline, wedding schedule with calendar exports, interactive location guide, gallery, guestbook, RSVP experience, and private Wedding Control Center.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
