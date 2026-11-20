@@ -10,6 +10,7 @@ import type { InvitationRecord, WeddingConfig } from './types/wedding';
 import { FallingPetals } from './components/FallingPetals';
 import { HeroSection } from './components/HeroSection';
 import { ViceExperienceBar } from './components/ViceExperienceBar';
+import { ViceCruise3DSection } from './components/ViceCruise3DSection';
 import { CollectorPostcardSection } from './components/CollectorPostcardSection';
 import { ScheduleSection } from './components/ScheduleSection';
 import { CountdownSection } from './components/CountdownSection';
@@ -148,6 +149,9 @@ export default function App() {
             onToggleAudio={() => void handleToggleAudio()}
             onSelectStation={(st) => void handleSelectStation(st)}
           />
+
+          {/* Interactive Real-Time Three.js 3D GTA VI Miami Ocean Drive Cruise */}
+          <ViceCruise3DSection config={config} theme={activeTheme} />
 
           {/* Viral 3D Tilt & Tap-to-Flip Collectible Miami Postcard */}
           <CollectorPostcardSection
