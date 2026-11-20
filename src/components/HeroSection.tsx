@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowDown, CalendarPlus, Compass, Share2 } from 'lucide-react';
+import { ArrowDown, CalendarPlus, Compass } from 'lucide-react';
 import { EDITORIAL_IMAGES } from '../data/weddingDefaults';
 import { buildIcsContent, downloadIcsFile } from '../lib/weddingUtils';
 import type { InvitationRecord, WeddingConfig } from '../types/wedding';
@@ -8,14 +8,9 @@ import type { InvitationRecord, WeddingConfig } from '../types/wedding';
 interface HeroSectionProps {
   config: WeddingConfig;
   personalInvite: InvitationRecord | null;
-  onShare: () => void;
 }
 
-export function HeroSection({
-  config,
-  personalInvite,
-  onShare,
-}: HeroSectionProps) {
+export function HeroSection({ config, personalInvite }: HeroSectionProps) {
   const prefersReduced = useReducedMotion();
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 50 });
 
@@ -210,14 +205,14 @@ export function HeroSection({
               <span className="relative z-10">Launch 3D Ocean Drive</span>
             </button>
 
-            <div className="grid grid-cols-3 gap-2 text-[10px] font-mono tracking-[0.16em] uppercase text-[#FAF3EA]/78">
+            <div className="grid grid-cols-2 gap-2.5 text-[10px] font-mono tracking-[0.16em] uppercase text-[#FAF3EA]/78">
               <button
                 type="button"
                 onClick={scrollToScratch}
                 className="inline-flex items-center justify-center gap-1.5 border border-[#FAF3EA]/16 bg-[var(--bg-surface)]/70 hover:border-[var(--accent-3)] hover:text-[var(--accent-3)] transition-colors min-h-[42px] px-2 cursor-pointer"
               >
                 <ArrowDown className="w-3.5 h-3.5 text-[var(--accent-3)]" />
-                <span>Timings</span>
+                <span>Scratch Timings</span>
               </button>
               <button
                 type="button"
@@ -226,14 +221,6 @@ export function HeroSection({
               >
                 <CalendarPlus className="w-3.5 h-3.5 text-[var(--accent-1)]" />
                 <span>Save Date</span>
-              </button>
-              <button
-                type="button"
-                onClick={onShare}
-                className="inline-flex items-center justify-center gap-1.5 border border-[#FAF3EA]/16 bg-[var(--bg-surface)]/70 hover:border-[var(--accent-cool)] hover:text-[var(--accent-cool)] transition-colors min-h-[42px] px-2 cursor-pointer"
-              >
-                <Share2 className="w-3.5 h-3.5 text-[var(--accent-cool)]" />
-                <span>Share</span>
               </button>
             </div>
           </motion.div>
@@ -360,15 +347,6 @@ export function HeroSection({
               >
                 <CalendarPlus className="w-4 h-4" />
                 <span>Save Date</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={onShare}
-                className="inline-flex items-center gap-2 px-3 py-4 text-[#FAF3EA]/70 hover:text-[var(--accent-cool)] text-xs font-mono tracking-[0.16em] uppercase transition-colors min-h-[52px] whitespace-nowrap cursor-pointer"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
               </button>
             </motion.div>
           </div>

@@ -6,17 +6,21 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Compass,
   Eye,
   EyeOff,
   Flame,
   Gauge,
+  Moon,
+  Sun,
+  Sunrise,
 } from 'lucide-react';
 import type { ViceThemeId } from '../types/theme';
 import type { WeddingConfig } from '../types/wedding';
 import { EDITORIAL_IMAGES } from '../data/weddingDefaults';
 import {
-  MIAMI_3D_PALETTES,
+  type TimeOfDayMode,
   buildArtDecoLamps,
   buildCausewayEnvironment,
   buildLuxuryConvertible,
@@ -25,6 +29,7 @@ import {
   buildSparkBurst,
   buildWaypointGates,
   createSkyBackdrop,
+  getMiamiLighting,
   triggerSparkBurst,
 } from './three/buildMiamiScene';
 
@@ -42,7 +47,17 @@ const CAMERA_LABELS: Record<CameraMode, string> = {
 };
 
 const CAMERA_ORDER: CameraMode[] = ['chase', 'orbit', 'front'];
+const TIME_ORDER: TimeOfDayMode[] = ['day', 'sunset', 'night'];
 const LANE_POSITIONS = [-3.2, 0, 3.2];
+
+const TIME_META: Record<
+  TimeOfDayMode,
+  { label: string; clock: string; short: string }
+> = {
+  day: { label: 'Miami Day', clock: '12:30 PM EDT', short: 'Day' },
+  sunset: { label: 'Golden Sunset', clock: '6:30 PM EDT', short: 'Sunset' },
+  night: { label: 'Vice Night', clock: '10:30 PM EDT', short: 'Night' },
+};
 
 function detectSoftwareWebGL(gl: WebGLRenderingContext | WebGL2RenderingContext): boolean {
   try {
@@ -59,6 +74,12 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
   const mountRef = useRef<HTMLDivElement | null>(null);
   const themeRef = useRef<ViceThemeId>(theme);
   themeRef.current = theme;
+
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDayMode>('sunset');
+  const timeOfDayRef = useRef<TimeOfDayMode>('sunset');
+  timeOfDayRef.current = timeOfDay;
+
+  const [autoTimeCycle, setAutoTimeCycle] = useState(false);
 
   const [cameraMode, setCameraMode] = useState<CameraMode>('chase');
   const cameraModeRef = useRef<CameraMode>('chase');
@@ -80,12 +101,13 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
   } | null>(null);
   const [webglUnavailable, setWebglUnavailable] = useState(false);
 
-  // Interactive steering state refs (zero React re-renders per animation frame)
+  // Interactive steering & celebration refs (zero React re-renders per animation frame)
   const targetLaneXRef = useRef(0);
   const steerHoldRef = useRef<-1 | 0 | 1>(0);
   const dragPointerIdRef = useRef<number | null>(null);
   const dragStartXRef = useRef(0);
   const dragBaseLaneXRef = useRef(0);
+  const celebratePulseRef = useRef(0);
   const bannerTimeoutRef = useRef<number | null>(null);
 
   const waypoints = useMemo(() => {
@@ -109,11 +131,38 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
   const waypointsRef = useRef(waypoints);
   waypointsRef.current = waypoints;
 
+  // Auto Day -> Sunset -> Night cycle timer when enabled
+  useEffect(() => {
+    if (!autoTimeCycle) return;
+    const id = window.setInterval(() => {
+      setTimeOfDay((curr) => {
+        const idx = TIME_ORDER.indexOf(curr);
+        return TIME_ORDER[(idx + 1) % TIME_ORDER.length];
+      });
+    }, 6500);
+    return () => window.clearInterval(id);
+  }, [autoTimeCycle]);
+
+  const handleSelectTime = (mode: TimeOfDayMode) => {
+    setAutoTimeCycle(false);
+    setTimeOfDay(mode);
+  };
+
+  const handleSelectCheckpoint = (idx: number) => {
+    setSelectedCheckpoint(idx);
+    setAutoTimeCycle(false);
+    // Sync 3D lighting realistically to each wedding hour!
+    if (idx === 0) setTimeOfDay('day');
+    else if (idx === 1 || idx === 2) setTimeOfDay('sunset');
+    else setTimeOfDay('night');
+  };
+
   const handleUnlockWaypoint = useCallback((idx: number) => {
     const safeIdx = idx % waypointsRef.current.length;
     const item = waypointsRef.current[safeIdx];
     if (!item) return;
 
+    celebratePulseRef.current = 1.6;
     setUnlockedIndices((prev) => (prev.includes(safeIdx) ? prev : [...prev, safeIdx]));
     setSelectedCheckpoint(safeIdx);
     setUnlockBanner({
@@ -162,10 +211,8 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
     let renderer: THREE.WebGLRenderer;
 
     try {
-      // Initial probe to detect software WebGL cleanly before final renderer config
       const probeCanvas = document.createElement('canvas');
-      const probeGl =
-        probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl');
+      const probeGl = probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl');
       if (!probeGl) {
         setWebglUnavailable(true);
         return;
@@ -198,32 +245,36 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
       container.appendChild(renderer.domElement);
 
       const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
-      const palette = MIAMI_3D_PALETTES[themeRef.current];
+      const initialLighting = getMiamiLighting(themeRef.current, timeOfDayRef.current);
 
-      // Scene & PMREM RoomEnvironment for crisp automotive clearcoat & chrome reflections
       const scene = new THREE.Scene();
-      const fog = new THREE.FogExp2(palette.fogColor.getHex(), 0.011);
+      const fog = new THREE.FogExp2(
+        initialLighting.fogColor.getHex(),
+        initialLighting.fogDensity
+      );
       scene.fog = fog;
 
       const pmrem = new THREE.PMREMGenerator(renderer);
       const envTarget = pmrem.fromScene(new RoomEnvironment(), 0.04);
       scene.environment = envTarget.texture;
-      scene.environmentIntensity = 0.78;
+      scene.environmentIntensity = initialLighting.envIntensity;
 
-      // Camera
       const camera = new THREE.PerspectiveCamera(56, initialWidth / initialHeight, 0.1, 260);
-      camera.position.set(0, 3.3, 8.2);
+      camera.position.set(0, 3.1, 7.6);
 
-      // 3-Point Warm Sunset + Cool Ocean Lighting Rig
+      // 3-Point Warm Sun / Twilight / Moonlight Lighting Rig
       const hemiLight = new THREE.HemisphereLight(
-        palette.keyLight.getHex(),
-        palette.oceanColor.getHex(),
-        0.9
+        initialLighting.hemiSky.getHex(),
+        initialLighting.hemiGround.getHex(),
+        initialLighting.hemiIntensity
       );
       scene.add(hemiLight);
 
-      const sunKeyLight = new THREE.DirectionalLight(palette.keyLight.getHex(), 2.35);
-      sunKeyLight.position.set(4, 14, -26);
+      const sunKeyLight = new THREE.DirectionalLight(
+        initialLighting.keyLight.getHex(),
+        initialLighting.keyIntensity
+      );
+      sunKeyLight.position.set(4, 16, -26);
       if (!isSoftwareGl) {
         sunKeyLight.castShadow = true;
         sunKeyLight.shadow.mapSize.set(1024, 1024);
@@ -237,38 +288,40 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
       }
       scene.add(sunKeyLight);
 
-      const rimFillLight = new THREE.DirectionalLight(palette.fillLight.getHex(), 1.15);
+      const rimFillLight = new THREE.DirectionalLight(
+        initialLighting.fillLight.getHex(),
+        initialLighting.fillIntensity
+      );
       rimFillLight.position.set(-12, 6, 12);
       scene.add(rimFillLight);
 
       // World Assembly
-      const sky = createSkyBackdrop(palette);
-      scene.add(sky.skyMesh, sky.sunGroup);
+      const sky = createSkyBackdrop(initialLighting);
+      scene.add(sky.skyMesh, sky.sunGroup, sky.starPoints);
 
-      const skyline = buildMiamiSkyline(palette);
+      const skyline = buildMiamiSkyline(initialLighting);
       scene.add(skyline.group);
 
-      const causeway = buildCausewayEnvironment(palette, maxAnisotropy);
+      const causeway = buildCausewayEnvironment(initialLighting, maxAnisotropy);
       scene.add(causeway.group);
 
-      const palmRow = buildPalmRow();
+      const palmRow = buildPalmRow(initialLighting);
       palmRow.palms.forEach((p) => scene.add(p));
 
-      const lampRow = buildArtDecoLamps(palette);
+      const lampRow = buildArtDecoLamps(initialLighting);
       lampRow.lamps.forEach((l) => scene.add(l));
 
       const plateTitle = `${config.brideFirstName} & ${config.groomFirstName}`;
       const plateDate = config.displayDate.replace(/^[^,]+,\s*/, '');
-      const car = buildLuxuryConvertible(palette, plateTitle, plateDate, maxAnisotropy);
+      const car = buildLuxuryConvertible(initialLighting, plateTitle, plateDate, maxAnisotropy);
       scene.add(car.root);
 
-      const gates = buildWaypointGates(palette);
+      const gates = buildWaypointGates(initialLighting);
       gates.forEach((g) => scene.add(g.group));
 
       const sparks = buildSparkBurst();
       scene.add(sparks.points);
 
-      // WebGL context loss resilience
       let contextLost = false;
       const onContextLost = (e: Event) => {
         e.preventDefault();
@@ -280,7 +333,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
       renderer.domElement.addEventListener('webglcontextlost', onContextLost);
       renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
 
-      // Resize observer for crisp portrait mobile & widescreen desktop framing
       const resizeObserver = new ResizeObserver((entries) => {
         const entry = entries[0];
         if (!entry) return;
@@ -292,7 +344,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
       });
       resizeObserver.observe(container);
 
-      // Software WebGL GPU fence pacing helper (follows threejs/SKILL.md)
       const glCtx = renderer.getContext();
       let fenceTimerId: number | null = null;
       const afterDraw = (next: () => void) => {
@@ -322,10 +373,9 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
         }
       };
 
-      // Pre-allocated animation state & vectors (zero GC in loop)
       const desiredCamPos = new THREE.Vector3();
       const desiredLookAt = new THREE.Vector3();
-      const currentLookAt = new THREE.Vector3(0, 1.2, -12);
+      const currentLookAt = new THREE.Vector3(0, 1.25, -12);
       let carX = 0;
       let prevCarX = 0;
       let currentSpeed = 24;
@@ -349,28 +399,126 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
           const motionScale = prefersReducedMotion ? 0.15 : 1;
           elapsed += dt * motionScale;
 
-          // Smooth live 3D theme palette transitions
-          const targetPalette = MIAMI_3D_PALETTES[themeRef.current];
-          const colorLerp = Math.min(1, dt * 4.5);
-          sky.skyMaterial.uniforms.uTop.value.lerp(targetPalette.skyTop, colorLerp);
-          sky.skyMaterial.uniforms.uMid.value.lerp(targetPalette.skyMid, colorLerp);
-          sky.skyMaterial.uniforms.uHorizon.value.lerp(targetPalette.skyHorizon, colorLerp);
-          fog.color.lerp(targetPalette.fogColor, colorLerp);
-          sky.sunCoreMat.color.lerp(targetPalette.sunCore, colorLerp);
-          sky.sunHaloMat.color.lerp(targetPalette.sunGlow, colorLerp);
-          causeway.oceanMaterial.color.lerp(targetPalette.oceanColor, colorLerp);
-          causeway.curbNeonMaterial.color.lerp(targetPalette.neonPrimary, colorLerp);
-          causeway.curbNeonMaterial.emissive.lerp(targetPalette.neonPrimary, colorLerp);
-          sunKeyLight.color.lerp(targetPalette.keyLight, colorLerp);
-          rimFillLight.color.lerp(targetPalette.fillLight, colorLerp);
-          car.bodyMaterial.color.lerp(targetPalette.carBody, colorLerp);
-          car.underglowMaterial.color.lerp(targetPalette.neonPrimary, colorLerp);
-          skyline.windowMaterials[0].color.lerp(targetPalette.neonPrimary, colorLerp);
-          skyline.windowMaterials[1].color.lerp(targetPalette.neonSecondary, colorLerp);
-          lampRow.bulbMaterials[0].color.lerp(targetPalette.neonSecondary, colorLerp);
-          lampRow.bulbMaterials[0].emissive.lerp(targetPalette.neonSecondary, colorLerp);
+          // Smooth real-time Day / Sunset / Night & Theme Lighting Transition
+          const target = getMiamiLighting(themeRef.current, timeOfDayRef.current);
+          const lerpRate = Math.min(1, dt * 3.4);
 
-          // Steering input (held buttons or drag/lane target)
+          sky.skyMaterial.uniforms.uTop.value.lerp(target.skyTop, lerpRate);
+          sky.skyMaterial.uniforms.uMid.value.lerp(target.skyMid, lerpRate);
+          sky.skyMaterial.uniforms.uHorizon.value.lerp(target.skyHorizon, lerpRate);
+
+          fog.color.lerp(target.fogColor, lerpRate);
+          fog.density = THREE.MathUtils.damp(fog.density, target.fogDensity, 3.2, dt);
+
+          sky.sunCoreMat.color.lerp(target.sunCore, lerpRate);
+          sky.sunHaloMat.color.lerp(target.sunGlow, lerpRate);
+          sky.sunBandMat.color.lerp(target.skyHorizon, lerpRate);
+          sky.sunBandMat.opacity = THREE.MathUtils.damp(
+            sky.sunBandMat.opacity,
+            target.sunBandOpacity,
+            3.2,
+            dt
+          );
+          sky.sunGroup.position.y = THREE.MathUtils.damp(
+            sky.sunGroup.position.y,
+            target.sunY,
+            3.0,
+            dt
+          );
+          const nextSunScale = THREE.MathUtils.damp(
+            sky.sunGroup.scale.x,
+            target.sunScale,
+            3.0,
+            dt
+          );
+          sky.sunGroup.scale.setScalar(nextSunScale);
+
+          // Twinkling night starfield
+          const starTargetOpacity =
+            target.starOpacity > 0.05
+              ? target.starOpacity * (0.88 + Math.sin(elapsed * 2.4) * 0.12)
+              : 0;
+          sky.starMaterial.opacity = THREE.MathUtils.damp(
+            sky.starMaterial.opacity,
+            starTargetOpacity,
+            3.2,
+            dt
+          );
+          sky.starPoints.rotation.y += dt * 0.008 * motionScale;
+
+          // Ocean, Palm Fronds, Streetlamps, Curbs, Skyline & 3-Point Lights
+          causeway.oceanMaterial.color.lerp(target.oceanColor, lerpRate);
+          palmRow.frondMaterial.color.lerp(target.palmFrondColor, lerpRate);
+
+          causeway.curbNeonMaterial.color.lerp(target.neonPrimary, lerpRate);
+          causeway.curbNeonMaterial.emissive.lerp(target.neonPrimary, lerpRate);
+          causeway.curbNeonMaterial.emissiveIntensity = THREE.MathUtils.damp(
+            causeway.curbNeonMaterial.emissiveIntensity,
+            target.curbEmissive,
+            3.2,
+            dt
+          );
+
+          lampRow.bulbMaterials[0].color.lerp(target.neonSecondary, lerpRate);
+          lampRow.bulbMaterials[0].emissive.lerp(target.neonSecondary, lerpRate);
+          lampRow.bulbMaterials[0].emissiveIntensity = THREE.MathUtils.damp(
+            lampRow.bulbMaterials[0].emissiveIntensity,
+            target.lampEmissive,
+            3.2,
+            dt
+          );
+
+          skyline.windowMaterials[0].color.lerp(target.neonPrimary, lerpRate);
+          skyline.windowMaterials[1].color.lerp(target.neonSecondary, lerpRate);
+
+          sunKeyLight.color.lerp(target.keyLight, lerpRate);
+          sunKeyLight.intensity = THREE.MathUtils.damp(
+            sunKeyLight.intensity,
+            target.keyIntensity,
+            3.2,
+            dt
+          );
+          sunKeyLight.position.y = THREE.MathUtils.damp(
+            sunKeyLight.position.y,
+            target.sunY * 0.55 + 6,
+            3.0,
+            dt
+          );
+
+          rimFillLight.color.lerp(target.fillLight, lerpRate);
+          rimFillLight.intensity = THREE.MathUtils.damp(
+            rimFillLight.intensity,
+            target.fillIntensity,
+            3.2,
+            dt
+          );
+
+          hemiLight.color.lerp(target.hemiSky, lerpRate);
+          hemiLight.groundColor.lerp(target.hemiGround, lerpRate);
+          hemiLight.intensity = THREE.MathUtils.damp(
+            hemiLight.intensity,
+            target.hemiIntensity,
+            3.2,
+            dt
+          );
+
+          scene.environmentIntensity = THREE.MathUtils.damp(
+            scene.environmentIntensity,
+            target.envIntensity,
+            3.2,
+            dt
+          );
+
+          car.bodyMaterial.color.lerp(target.carBody, lerpRate);
+          car.underglowMaterial.color.lerp(target.neonPrimary, lerpRate);
+          car.underglowMaterial.opacity = THREE.MathUtils.damp(
+            car.underglowMaterial.opacity,
+            target.underglowOpacity,
+            3.4,
+            dt
+          );
+
+          // Steering input
           if (steerHoldRef.current !== 0) {
             targetLaneXRef.current = THREE.MathUtils.clamp(
               targetLaneXRef.current + steerHoldRef.current * 7.2 * dt,
@@ -389,9 +537,9 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
           currentSpeed = THREE.MathUtils.damp(currentSpeed, targetSpeed, 3.8, dt);
           const travel = currentSpeed * dt * motionScale;
 
-          // Update car transform, subtle suspension bounce, body roll & wheel turn
+          // Update car transform, suspension bounce, body roll & wheel turn
           car.root.position.x = carX;
-          car.bodyGroup.position.y = Math.sin(elapsed * 9.5) * 0.018;
+          car.bodyGroup.position.y = Math.sin(elapsed * 9.5) * 0.016;
           car.bodyGroup.rotation.z = THREE.MathUtils.damp(
             car.bodyGroup.rotation.z,
             -lateralVel * 0.022,
@@ -404,8 +552,67 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
             8,
             dt
           );
-          car.tailLightMaterial.emissiveIntensity = isTurbo ? 4.8 : 3.0;
-          car.headlightBeamMaterial.opacity = isTurbo ? 0.2 : 0.12;
+
+          // Headlights & Taillights adapt to Day / Sunset / Night + Turbo Boost
+          const beamTarget = target.headlightBeamOpacity * (isTurbo ? 1.35 : 1.0);
+          car.headlightBeamMaterial.opacity = THREE.MathUtils.damp(
+            car.headlightBeamMaterial.opacity,
+            beamTarget,
+            4.5,
+            dt
+          );
+          car.headlightMaterial.emissiveIntensity = THREE.MathUtils.damp(
+            car.headlightMaterial.emissiveIntensity,
+            target.headlightEmissive,
+            4.5,
+            dt
+          );
+          car.tailLightMaterial.emissiveIntensity = isTurbo
+            ? 4.8
+            : timeOfDayRef.current === 'day'
+            ? 1.5
+            : 3.1;
+
+          // Animate Seated 3D Couple (Ava & Noah)
+          if (celebratePulseRef.current > 0) {
+            celebratePulseRef.current = Math.max(0, celebratePulseRef.current - dt);
+          }
+          // Groom turns his head smoothly into corners
+          car.couple.groomHead.rotation.y = THREE.MathUtils.damp(
+            car.couple.groomHead.rotation.y,
+            THREE.MathUtils.clamp(-lateralVel * 0.06, -0.32, 0.32),
+            7,
+            dt
+          );
+          // Bride gently gazes toward the ocean / groom with warm motion
+          car.couple.brideHead.rotation.y = THREE.MathUtils.damp(
+            car.couple.brideHead.rotation.y,
+            Math.sin(elapsed * 0.85) * 0.14 - lateralVel * 0.03,
+            6,
+            dt
+          );
+          // Bride's 3-segment translucent bridal veil ripples dynamically in the Miami wind!
+          const windFreq = isTurbo ? 15.5 : 8.5;
+          const windAmp = isTurbo ? 0.18 : 0.1;
+          for (let s = 0; s < car.couple.brideVeilSegments.length; s++) {
+            const seg = car.couple.brideVeilSegments[s];
+            seg.rotation.x =
+              Math.PI / 2 -
+              0.18 +
+              s * 0.05 +
+              Math.sin(elapsed * windFreq - s * 1.1) * windAmp * (s + 1) * 0.45;
+            seg.rotation.z =
+              Math.cos(elapsed * (windFreq * 0.65) - s * 0.9) * windAmp * (s + 1) * 0.35 -
+              lateralVel * 0.015 * (s + 1);
+          }
+          // Bride lifts her bouquet arm gently on Turbo Boost or Checkpoint unlock!
+          const celebrateLift = isTurbo || celebratePulseRef.current > 0 ? -0.52 : 0;
+          car.couple.brideRightArm.rotation.x = THREE.MathUtils.damp(
+            car.couple.brideRightArm.rotation.x,
+            celebrateLift + Math.sin(elapsed * 3.2) * 0.04,
+            6,
+            dt
+          );
 
           for (const w of car.wheels) {
             w.rotation.x -= travel * 2.4;
@@ -419,10 +626,8 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
             );
           }
 
-          // Scroll highway asphalt texture
           causeway.roadTexture.offset.y += travel * 0.082;
 
-          // Scroll palm trees with gentle tropical sea breeze sway
           for (let i = 0; i < palmRow.palms.length; i++) {
             const p = palmRow.palms[i];
             p.position.z += travel;
@@ -432,7 +637,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
             palmRow.frondGroups[i].rotation.z = Math.sin(elapsed * 1.8 + i * 0.9) * 0.045;
           }
 
-          // Scroll art-deco street lamps
           for (let i = 0; i < lampRow.lamps.length; i++) {
             const l = lampRow.lamps[i];
             l.position.z += travel;
@@ -441,16 +645,14 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
             }
           }
 
-          // Scroll interactive glowing 3D wedding waypoint gates & check collision
           for (let i = 0; i < gates.length; i++) {
             const gate = gates[i];
             gate.group.position.z += travel;
             gate.outerRing.rotation.z += dt * 1.15 * motionScale;
             gate.innerRing.rotation.z -= dt * 1.75 * motionScale;
-            gate.ringMaterial.emissive.lerp(targetPalette.neonPrimary, colorLerp);
-            gate.beaconMaterial.color.lerp(targetPalette.neonSecondary, colorLerp);
+            gate.ringMaterial.emissive.lerp(target.neonPrimary, lerpRate);
+            gate.beaconMaterial.color.lerp(target.neonSecondary, lerpRate);
 
-            // Hit detection as car passes through the glowing golden ring
             if (
               !gate.collectedThisPass &&
               gate.group.position.z > -1.7 &&
@@ -466,20 +668,23 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
               gate.group.position.z -= gateWrapSpan;
               gate.collectedThisPass = false;
               const nextLane =
-                LANE_POSITIONS[(gate.eventIndex + Math.floor(elapsed * 0.25)) % LANE_POSITIONS.length];
+                LANE_POSITIONS[
+                  (gate.eventIndex + Math.floor(elapsed * 0.25)) % LANE_POSITIONS.length
+                ];
               gate.laneX = nextLane;
               gate.group.position.x = nextLane;
             }
           }
 
-          // Update 3D spark burst particles on waypoint collection
           if (sparks.active) {
             sparks.life -= dt * 1.45;
             if (sparks.life <= 0) {
               sparks.active = false;
               sparks.points.visible = false;
             } else {
-              const posAttr = sparks.points.geometry.getAttribute('position') as THREE.BufferAttribute;
+              const posAttr = sparks.points.geometry.getAttribute(
+                'position'
+              ) as THREE.BufferAttribute;
               const arr = posAttr.array as Float32Array;
               for (let i = 0; i < arr.length / 3; i++) {
                 arr[i * 3] += sparks.velocities[i * 3] * dt;
@@ -492,10 +697,10 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
             }
           }
 
-          // Dynamic GTA Camera Presets (Mobile aspect-aware framing)
+          // Camera presets tuned so the seated 3D couple is clearly visible from every angle!
           const isPortrait = camera.aspect < 1;
           const mode = cameraModeRef.current;
-          const targetFov = mode === 'chase' ? (isTurbo ? 68 : 58) : 52;
+          const targetFov = mode === 'chase' ? (isTurbo ? 66 : 56) : 50;
           if (Math.abs(camera.fov - targetFov) > 0.05) {
             camera.fov = THREE.MathUtils.damp(camera.fov, targetFov, 4.5, dt);
             camera.updateProjectionMatrix();
@@ -503,28 +708,28 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
 
           if (mode === 'chase') {
             desiredCamPos.set(
-              carX * 0.62,
-              isPortrait ? 3.55 : 2.95,
-              isPortrait ? 9.4 : 7.8
+              carX * 0.65,
+              isPortrait ? 3.25 : 2.85,
+              isPortrait ? 8.4 : 7.0
             );
-            desiredLookAt.set(carX * 0.42, 1.35, -18);
+            desiredLookAt.set(carX * 0.48, 1.35, -14);
           } else if (mode === 'orbit') {
-            const orbitAngle = Math.sin(elapsed * 0.42) * 0.95;
-            const radius = isPortrait ? 9.2 : 7.6;
+            const orbitAngle = Math.sin(elapsed * 0.44) * 1.15;
+            const radius = isPortrait ? 8.2 : 6.6;
             desiredCamPos.set(
               carX + Math.sin(orbitAngle) * radius,
-              2.5 + Math.cos(elapsed * 0.6) * 0.35,
+              2.35 + Math.cos(elapsed * 0.6) * 0.3,
               Math.cos(orbitAngle) * radius
             );
-            desiredLookAt.set(carX, 1.05, -2.5);
+            desiredLookAt.set(carX, 1.18, -0.5);
           } else {
-            // Front 3/4 Movie Poster Hero Angle
+            // Front 3/4 Movie Poster Hero Angle showing Ava & Noah seated face-on!
             desiredCamPos.set(
-              carX + (isPortrait ? 3.1 : 3.8),
-              1.9,
-              isPortrait ? -7.2 : -6.2
+              carX + (isPortrait ? 2.65 : 3.25),
+              2.05,
+              isPortrait ? -6.1 : -5.3
             );
-            desiredLookAt.set(carX, 0.95, 1.2);
+            desiredLookAt.set(carX, 1.18, 0.55);
           }
 
           camera.position.lerp(desiredCamPos, Math.min(1, dt * 4.8));
@@ -533,7 +738,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
 
           renderer.render(scene, camera);
 
-          // Throttled MPH HUD readout (~8x/sec for clean zero-jank UI)
           if (now - lastHudUpdate > 125) {
             lastHudUpdate = now;
             const mph = Math.round(currentSpeed * 2.78 + Math.sin(elapsed * 3.1) * 1.4);
@@ -544,10 +748,8 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
         afterDraw(tick);
       };
 
-      // Kick off first frame
       tick();
 
-      // Keyboard steering support for desktop players
       const onKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
           steerHoldRef.current = -1;
@@ -585,7 +787,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
         renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
         renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
 
-        // Full GPU resource disposal
         scene.traverse((obj) => {
           if (obj instanceof THREE.Mesh || obj instanceof THREE.Points) {
             obj.geometry?.dispose();
@@ -611,7 +812,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
     }
   }, [config.brideFirstName, config.displayDate, config.groomFirstName, handleUnlockWaypoint]);
 
-  // Direct touch / pointer horizontal drag steering on the 3D stage
   const handleCanvasPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     dragPointerIdRef.current = e.pointerId;
     dragStartXRef.current = e.clientX;
@@ -635,6 +835,7 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
   };
 
   const activeEvent = waypoints[selectedCheckpoint] || waypoints[0];
+  const activeTimeMeta = TIME_META[timeOfDay];
 
   return (
     <section
@@ -642,8 +843,8 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
       className="relative py-16 sm:py-22 px-4 sm:px-6 lg:px-8 bg-[var(--bg-canvas)] border-b border-[#FAF3EA]/10 overflow-hidden transition-colors duration-500"
     >
       <div className="max-w-6xl mx-auto">
-        {/* Clean Editorial × GTA VI Mission Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
+        {/* Clean Editorial × GTA VI Mission Header + Day/Sunset/Night Live Switcher */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 sm:mb-7">
           <div>
             <div className="flex items-center gap-2.5 text-[10px] sm:text-[11px] font-mono tracking-[0.24em] uppercase text-[var(--accent-3)] mb-2">
               <Compass className="w-3.5 h-3.5" />
@@ -654,17 +855,76 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
             </h2>
           </div>
 
-          <p className="text-xs sm:text-sm text-[#FAF3EA]/70 max-w-sm leading-relaxed">
-            Steer {config.displayNames}&rsquo;s sunset convertible down Miami Beach. Drive through
-            the glowing golden rings to unlock all {waypoints.length} wedding timings.
-          </p>
+          {/* Real Working Day / Sunset / Night / Auto Time-of-Day Switcher */}
+          <div className="flex flex-col sm:items-end gap-1.5">
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#FAF3EA]/60">
+              Miami Time of Day · {activeTimeMeta.clock}
+            </span>
+            <div
+              role="group"
+              aria-label="Select 3D Miami time of day"
+              className="grid grid-cols-4 border border-[#FAF3EA]/18 bg-[var(--bg-surface)] divide-x divide-[#FAF3EA]/12"
+            >
+              <button
+                type="button"
+                onClick={() => handleSelectTime('day')}
+                aria-pressed={!autoTimeCycle && timeOfDay === 'day'}
+                className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[42px] font-mono text-[10px] tracking-[0.16em] uppercase cursor-pointer transition-colors ${
+                  !autoTimeCycle && timeOfDay === 'day'
+                    ? 'vice-cta-bg text-[#0A090F] font-semibold'
+                    : 'text-[#FAF3EA]/75 hover:text-[#FAF3EA]'
+                }`}
+              >
+                <Sun className="w-3.5 h-3.5" />
+                <span>Day</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectTime('sunset')}
+                aria-pressed={!autoTimeCycle && timeOfDay === 'sunset'}
+                className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[42px] font-mono text-[10px] tracking-[0.16em] uppercase cursor-pointer transition-colors ${
+                  !autoTimeCycle && timeOfDay === 'sunset'
+                    ? 'vice-cta-bg text-[#0A090F] font-semibold'
+                    : 'text-[#FAF3EA]/75 hover:text-[#FAF3EA]'
+                }`}
+              >
+                <Sunrise className="w-3.5 h-3.5" />
+                <span>Sunset</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectTime('night')}
+                aria-pressed={!autoTimeCycle && timeOfDay === 'night'}
+                className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[42px] font-mono text-[10px] tracking-[0.16em] uppercase cursor-pointer transition-colors ${
+                  !autoTimeCycle && timeOfDay === 'night'
+                    ? 'vice-cta-bg text-[#0A090F] font-semibold'
+                    : 'text-[#FAF3EA]/75 hover:text-[#FAF3EA]'
+                }`}
+              >
+                <Moon className="w-3.5 h-3.5" />
+                <span>Night</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAutoTimeCycle((prev) => !prev)}
+                aria-pressed={autoTimeCycle}
+                className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[42px] font-mono text-[10px] tracking-[0.16em] uppercase cursor-pointer transition-colors ${
+                  autoTimeCycle
+                    ? 'bg-[var(--accent-cool)] text-[#0A090F] font-semibold'
+                    : 'text-[#FAF3EA]/75 hover:text-[#FAF3EA]'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>Auto</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* ============================================================
             3D WEBGL GAMING STAGE (Zero backdrop-blur over WebGL canvas)
             ============================================================ */}
         <div className="relative border border-[#FAF3EA]/18 bg-[#0A090F] shadow-[0_24px_70px_rgba(0,0,0,0.6)] overflow-hidden">
-          {/* Architectural GTA VI Corner Reticles */}
           <span
             aria-hidden="true"
             className="pointer-events-none absolute top-2.5 left-2.5 z-20 w-4 h-4 border-t-2 border-l-2 border-[var(--accent-3)]/80"
@@ -674,7 +934,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
             className="pointer-events-none absolute top-2.5 right-2.5 z-20 w-4 h-4 border-t-2 border-r-2 border-[var(--accent-3)]/80"
           />
 
-          {/* Live 3D Viewport */}
           <div
             className="relative w-full h-[460px] sm:h-[520px] lg:h-[560px] select-none cursor-grab active:cursor-grabbing"
             onPointerDown={handleCanvasPointerDown}
@@ -703,13 +962,13 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
               <div ref={mountRef} className="w-full h-full" />
             )}
 
-            {/* Top Gaming HUD Strip (Compact, Non-Obstructive, Zero backdrop-blur) */}
+            {/* Top Gaming HUD Strip */}
             {!hudHidden && !webglUnavailable && (
               <div className="pointer-events-none absolute top-4 left-4 right-4 z-10 flex items-start justify-between gap-3">
-                {/* Mission Date & Checkpoint Tracker */}
+                {/* Mission Date, Time-of-Day & Checkpoint Tracker */}
                 <div className="bg-[#0A090F]/86 border border-[#FAF3EA]/16 px-3.5 py-2.5">
                   <p className="font-mono text-[9px] sm:text-[10px] tracking-[0.22em] uppercase text-[var(--accent-3)]">
-                    Wedding Mission · {config.city}
+                    {activeTimeMeta.label} · {activeTimeMeta.clock}
                   </p>
                   <p className="font-display text-xl sm:text-2xl tracking-[0.08em] text-[#FAF3EA] leading-tight mt-0.5">
                     {config.displayDate.toUpperCase()}
@@ -766,12 +1025,11 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
               </div>
             )}
 
-            {/* Bottom Compact Gaming Control Dock (Touch-Friendly on Phones!) */}
+            {/* Bottom Compact Gaming Control Dock */}
             {!webglUnavailable && (
               <div className="absolute bottom-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2">
                 {!hudHidden ? (
                   <>
-                    {/* Left / Right Steer Controls */}
                     <div className="flex items-center gap-1.5">
                       <button
                         type="button"
@@ -789,7 +1047,7 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
                         className="inline-flex items-center justify-center gap-1 px-3.5 sm:px-4 min-h-[44px] bg-[#0A090F]/90 border border-[#FAF3EA]/22 hover:border-[var(--accent-3)] active:bg-[var(--accent-3)] active:text-[#0A090F] text-[#FAF3EA] font-mono text-[11px] tracking-[0.16em] uppercase cursor-pointer transition-colors"
                       >
                         <ChevronLeft className="w-4 h-4" />
-                        <span className="hidden xs:inline sm:inline">Left</span>
+                        <span className="hidden sm:inline">Left</span>
                       </button>
 
                       <button
@@ -807,12 +1065,11 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
                         }}
                         className="inline-flex items-center justify-center gap-1 px-3.5 sm:px-4 min-h-[44px] bg-[#0A090F]/90 border border-[#FAF3EA]/22 hover:border-[var(--accent-3)] active:bg-[var(--accent-3)] active:text-[#0A090F] text-[#FAF3EA] font-mono text-[11px] tracking-[0.16em] uppercase cursor-pointer transition-colors"
                       >
-                        <span className="hidden xs:inline sm:inline">Right</span>
+                        <span className="hidden sm:inline">Right</span>
                         <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
 
-                    {/* Turbo Boost + Camera Presets + Hide HUD */}
                     <div className="flex items-center gap-1.5">
                       <button
                         type="button"
@@ -863,7 +1120,7 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
           </div>
 
           {/* ============================================================
-              4-CHECKPOINT WEDDING SCHEDULE MISSION BAR (Clear Date & Timings)
+              4-CHECKPOINT WEDDING SCHEDULE MISSION BAR (Click to Sync Day/Sunset/Night!)
               ============================================================ */}
           <div className="border-t border-[#FAF3EA]/14 bg-[var(--bg-surface)]">
             <div className="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#FAF3EA]/10">
@@ -874,7 +1131,7 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setSelectedCheckpoint(idx)}
+                    onClick={() => handleSelectCheckpoint(idx)}
                     className={`text-left p-4 transition-colors cursor-pointer ${
                       selected
                         ? 'bg-[#FAF3EA]/[0.06] border-t-2 border-t-[var(--accent-3)]'
@@ -900,7 +1157,6 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
               })}
             </div>
 
-            {/* Active Checkpoint Detail Strip */}
             {activeEvent && (
               <div className="px-4 sm:px-6 py-3.5 border-t border-[#FAF3EA]/10 bg-[var(--bg-canvas)]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono uppercase tracking-[0.16em]">
@@ -915,7 +1171,7 @@ export function ViceCruise3DSection({ config, theme }: ViceCruise3DSectionProps)
                   <span className="text-[#FAF3EA]/72">{activeEvent.location}</span>
                 </div>
                 <p className="text-xs text-[#FAF3EA]/65">
-                  Drag scene or tap Left / Right to steer through golden rings
+                  Tap Cam to view {config.displayNames} up close · Tap Day / Sunset / Night
                 </p>
               </div>
             )}

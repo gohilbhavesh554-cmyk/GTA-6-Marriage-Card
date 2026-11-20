@@ -137,7 +137,6 @@ export default function App() {
           <HeroSection
             config={config}
             personalInvite={personalInvite}
-            onShare={() => void handleShareInvitation()}
           />
 
           {/* Live Atmosphere Theme Switcher + 3-Station Vice FM Soundtrack */}
